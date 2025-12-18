@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零食小铺 - 美味零食一站式选购</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="description" content="零食小铺是面向消费者的零食选购平台，提供薯片、糖果、泡面、干货等各类休闲零食，支持在线选购和订单提交。">
+    <style>
+        /* 全局重置 + 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f5f0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 无障碍样式 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* 页面容器：默认隐藏所有，只显示活跃页面 */
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+
+        /* 头部样式 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: #e67e22;
+        }
+
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 导航样式 */
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        .main-nav li {
+            margin-left: 30px;
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+            cursor: pointer; /* 非链接，添加指针样式 */
+        }
+
+        .main-nav a.active,
+        .main-nav a:hover {
+            color: #e67e22;
+        }
+
+        /* 搜索框样式 */
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #e67e22;
+        }
+
+        .search-box button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #e67e22;
+            color: #fff;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-box button:hover {
+            background-color: #d35400;
+        }
+
+        /* 移动端汉堡菜单 */
+        .menu-toggle {
+            display: none;
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* 轮播图样式 */
+        .banner {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .banner-slider {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            animation: slide 10s infinite alternate;
+        }
+
+        .banner-img {
+            width: 50%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 分类区域样式（Flexbox） */
+        .categories {
+            margin: 40px 0;
+        }
+
+        .categories h2,
+        .recommend h2,
+        .products-page h2,
+        .cart-page h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .categories h2::after,
+        .recommend h2::after,
+        .products-page h2::after,
+        .cart-page h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background-color: #e67e22;
+            margin: 10px auto;
+        }
+
+        .category-list {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .category-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s;
+            cursor: pointer; /* 非链接，添加指针样式 */
+        }
+
+        .category-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .category-item:hover {
+            transform: scale(1.05);
+            color: #e67e22;
+        }
+
+        /* 推荐商品样式（Grid） */
+        .recommend {
+            margin: 40px 0;
+        }
+
+        .product-grid,
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart {
+            background-color: #e67e22;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .add-to-cart:hover {
+            background-color: #d35400;
+        }
+
+        /* 商品列表页样式 */
+        .products-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .filter-sidebar {
+            flex: 0 0 200px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            margin-bottom: 25px;
+        }
+
+        .filter-group h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .filter-options {
+            list-style: none;
+        }
+
+        .filter-options li {
+            margin-bottom: 10px;
+        }
+
+        .filter-btn,
+        .price-filter {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            padding: 5px 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        .filter-btn.active,
+        .price-filter.active,
+        .filter-btn:hover,
+        .price-filter:hover {
+            color: #e67e22;
+            font-weight: 500;
+        }
+
+        /* 购物车页面样式 */
+        .cart-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .cart-items {
+            flex: 1;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 50px 0;
+            color: #666;
+        }
+
+        .empty-cart i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .go-shopping {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #e67e22;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .go-shopping:hover {
+            background-color: #d35400;
+        }
+
+        /* 购物车商品项（JS动态渲染） */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .cart-item-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        .quantity-input {
+            width: 50px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-left: none;
+            border-right: none;
+            outline: none;
+        }
+
+        .cart-item-delete {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        .cart-item-delete:hover {
+            color: #c0392b;
+        }
+
+        .cart-summary {
+            flex: 0 0 350px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding-top: 20px;
+            border-top: 2px solid #f5f5f5;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        /* 下单表单样式 */
+        .order-form {
+            margin-top: 30px;
+            border-top: 2px solid #f5f5f5;
+            padding-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #e67e22;
+        }
+
+        .error-message {
+            display: block;
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            height: 18px;
+        }
+
+        .place-order {
+            width: 100%;
+            padding: 12px;
+            background-color: #e67e22;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .place-order:hover {
+            background-color: #d35400;
+        }
+
+        /* 底部样式 */
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background-color: #e67e22;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer-section p {
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式适配（移动端） */
+        @media (max-width: 767px) {
+            /* 头部导航适配 */
+            .header-container {
+                flex-wrap: wrap;
+            }
+
+            .menu-toggle {
+                display: block;
+                order: 1;
+            }
+
+            .main-nav {
+                order: 4;
+                width: 100%;
+                display: none;
+                margin-top: 15px;
+            }
+
+            .main-nav.active {
+                display: block;
+            }
+
+            .main-nav ul {
+                flex-direction: column;
+            }
+
+            .main-nav li {
+                margin: 10px 0;
+            }
+
+            .logo {
+                order: 2;
+                margin-right: auto;
+            }
+
+            .search-box {
+                order: 3;
+                margin-left: auto;
+                width: 180px;
+            }
+
+            /* 轮播图适配 */
+            .banner {
+                height: 180px;
+            }
+
+            /* 商品列表页适配 */
+            .products-container {
+                flex-direction: column;
+            }
+
+            .filter-sidebar {
+                width: 100%;
+                flex: none;
+            }
+
+            /* 购物车页面适配 */
+            .cart-container {
+                flex-direction: column;
+            }
+
+            .cart-summary {
+                width: 100%;
+                flex: none;
+            }
+
+            /* 商品网格适配 */
+            .product-grid,
+            .product-list {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .product-img {
+                height: 140px;
+            }
+
+            .product-name {
+                font-size: 1rem;
+            }
+
+            .product-price {
+                font-size: 1.1rem;
+            }
+
+            .add-to-cart {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 语义化头部：统一导航 -->
+    <header>
+        <div class="container header-container">
+            <a href="javascript:;" class="logo" aria-label="返回零食小铺首页">
+                <h1>零食小铺</h1>
+            </a>
+            <button class="menu-toggle" aria-label="打开导航菜单" aria-expanded="false">
+                <<i class="fas fa-bars"></</i>
+            </button>
+            <nav class="main-nav" aria-label="主导航">
+                <ul>
+                    <!-- 导航项：点击切换页面 -->
+                    <li><a href="javascript:;" class="nav-link active" data-page="home-page" aria-current="page">首页</a></li>
+                    <li><a href="javascript:;" class="nav-link" data-page="products-page">商品列表</a></li>
+                    <li><a href="javascript:;" class="nav-link" data-page="cart-page">购物车</a></li>
+                </ul>
+            </nav>
+            <div class="search-box">
+                <label for="search" class="sr-only">搜索零食</label>
+                <input type="text" id="search" placeholder="搜索零食..." aria-describedby="search-desc">
+                <span id="search-desc" class="sr-only">输入零食名称即可搜索相关商品</span>
+                <button type="button" aria-label="搜索"><<i class="fas fa-search"></</i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区：包含三个页面的内容 -->
+    <main>
+        <!-- 1. 首页内容 -->
+        <section id="home-page" class="page-content active">
+            <!-- 轮播图：页面头部图片 -->
+            <section class="banner" aria-label="促销活动展示">
+                <div class="banner-slider">
+                    <div class="slide active" aria-label="促销活动：零食满300减100，限时3天">
+                        <img src="https://pic.616pic.com/ys_bnew_img/00/31/00/SgZLV5CdBM.jpg" alt="零食满300减100" class="banner-img">
+                    </div>
+                    <div class="slide" aria-label="促销活动：新品零食8折优惠，包含薯片、糖果等">
+                        <img src="https://pic.616pic.com/ys_bnew_img/00/31/00/SgZLV5CdBM.jpg" alt="新品零食8折" class="banner-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 分类区域：按指定链接替换 -->
+            <section class="categories container">
+                <h2>热门分类</h2>
+                <div class="category-list">
+                    <!-- 薯片类 -->
+                    <div class="category-item" data-category="chip" aria-label="查看薯片类零食">
+                        <img src="https://imgservice.suning.cn/uimg1/b2c/image/_g6Xm7MgaE0Hbn5zC_rnCw.png" alt="薯片类零食" class="category-img">
+                        <span>薯片类</span>
+                    </div>
+                    <!-- 糖果类 -->
+                    <div class="category-item" data-category="candy" aria-label="查看糖果类零食">
+                        <img src="https://img95.699pic.com/photo/60044/9939.jpg_wh860.jpg" alt="糖果类零食" class="category-img">
+                        <span>糖果类</span>
+                    </div>
+                    <!-- 泡面类 -->
+                    <div class="category-item" data-category="noodle" aria-label="查看泡面类零食">
+                        <img src="https://img95.699pic.com/photo/50082/7162.jpg_wh860.jpg" alt="泡面类零食" class="category-img">
+                        <span>泡面类</span>
+                    </div>
+                    <!-- 干货类 -->
+                    <div class="category-item" data-category="dried" aria-label="查看干货类零食">
+                        <img src="https://ts2.tc.mm.bing.net/th/id/OIP-C.wEsdZRpbFvu6nuhuEAG8lgHaE7?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3" alt="干货类零食" class="category-img">
+                        <span>干货类</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 推荐商品：按指定链接替换 -->
+            <section class="recommend container">
+                <h2>推荐零食</h2>
+                <div class="product-grid">
+                    <!-- 商品1：香辣薯片 -->
+                    <div class="product-card" data-id="1" data-name="香辣薯片" data-price="15.9" aria-label="商品：香辣薯片，价格15.9元，酥脆口感，香辣过瘾">
+                        <div class="product-link" data-target="snack1" aria-label="查看香辣薯片详情">
+                            <img src="https://img95.699pic.com/photo/60053/2997.jpg_wh860.jpg" alt="香辣薯片" class="product-img">
+                        </div>
+                        <h3 class="product-name">香辣薯片</h3>
+                        <p class="product-price">¥15.9</p>
+                        <button class="add-to-cart" aria-label="将香辣薯片加入购物车">加入购物车</button>
+                    </div>
+                    <!-- 商品2：草莓软糖 -->
+                    <div class="product-card" data-id="2" data-name="草莓软糖" data-price="12.5" aria-label="商品：草莓软糖，价格12.5元，Q弹多汁，草莓果香">
+                        <div class="product-link" data-target="snack2" aria-label="查看草莓软糖详情">
+                            <img src="https://imgservice.suning.cn/uimg1/b2c/image/5-dbam4HHn7AWYiTgYZKXw.jpg" alt="草莓软糖" class="product-img">
+                        </div>
+                        <h3 class="product-name">草莓软糖</h3>
+                        <p class="product-price">¥12.5</p>
+                        <button class="add-to-cart" aria-label="将草莓软糖加入购物车">加入购物车</button>
+                    </div>
+                    <!-- 商品3：红烧牛肉面 -->
+                    <div class="product-card" data-id="3" data-name="红烧牛肉面" data-price="8.9" aria-label="商品：红烧牛肉面，价格8.9元，经典口味，方便速食">
+                        <div class="product-link" data-target="snack3" aria-label="查看红烧牛肉面详情">
+                            <img src="https://ts4.tc.mm.bing.net/th/id/OIP-C.KcoO751UfC2B6aQA9RdHTgHaK1?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3" alt="红烧牛肉面" class="product-img">
+                        </div>
+                        <h3 class="product-name">红烧牛肉面</h3>
+                        <p class="product-price">¥8.9</p>
+                        <button class="add-to-cart" aria-label="将红烧牛肉面加入购物车">加入购物车</button>
+                    </div>
+                    <!-- 商品4：原味坚果 -->
+                    <div class="product-card" data-id="4" data-name="原味坚果" data-price="29.9" aria-label="商品：原味坚果，价格29.9元，混合坚果，无添加">
+                        <div class="product-link" data-target="snack4" aria-label="查看原味坚果详情">
+                            <img src="https://pic.52112.com/JPG-180506/180506_123/RC8q1GmglB_small.jpg" alt="原味坚果" class="product-img">
+                        </div>
+                        <h3 class="product-name">原味坚果</h3>
+                        <p class="product-price">¥29.9</p>
+                        <button class="add-to-cart" aria-label="将原味坚果加入购物车">加入购物车</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- 2. 商品列表页内容 -->
+        <section id="products-page" class="page-content">
+            <section class="products-page container">
+                <h2>零食商品库</h2>
+                <div class="products-container">
+                    <!-- 左侧筛选栏 -->
+                    <div class="filter-sidebar" aria-label="商品筛选条件">
+                        <h3>筛选条件</h3>
+                        <div class="filter-group">
+                            <h4>商品分类</h4>
+                            <ul class="filter-options" aria-label="分类筛选列表">
+                                <li><button class="filter-btn active" data-filter="all" aria-label="查看全部商品">全部</button></li>
+                                <li><button class="filter-btn" data-filter="chip" aria-label="查看薯片类商品">薯片类</button></li>
+                                <li><button class="filter-btn" data-filter="candy" aria-label="查看糖果类商品">糖果类</button></li>
+                                <li><button class="filter-btn" data-filter="noodle" aria-label="查看泡面类商品">泡面类</button></li>
+                                <li><button class="filter-btn" data-filter="dried" aria-label="查看干货类商品">干货类</button></li>
+                            </ul>
+                        </div>
+                        <div class="filter-group">
+                            <h4>价格区间</h4>
+                            <ul class="filter-options" aria-label="价格筛选列表">
+                                <li><button class="price-filter" data-min="0" data-max="10" aria-label="查看0-10元商品">¥0-¥10</button></li>
+                                <li><button class="price-filter" data-min="10" data-max="20" aria-label="查看10-20元商品">¥10-¥20</button></li>
+                                <li><button class="price-filter" data-min="20" data-max="50" aria-label="查看20-50元商品">¥20-¥50</button></li>
+                                <li><button class="price-filter" data-min="50" data-max="100" aria-label="查看50元以上商品">¥50+</button></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 右侧商品网格：按指定链接替换 -->
+                    <div class="product-list">
+                        <!-- 薯片类商品 -->
+                        <div class="product-card" data-category="chip" id="snack1" aria-label="商品：香辣薯片，价格15.9元，酥脆口感，香辣过瘾，净含量100g">
+                            <img src="https://img95.699pic.com/photo/60053/2997.jpg_wh860.jpg" alt="香辣薯片" class="product-img">
+                            <h3 class="product-name">香辣薯片</h3>
+                            <p class="product-desc">酥脆口感，香辣过瘾，净含量100g</p>
+                            <p class="product-price">¥15.9</p>
+                            <button class="add-to-cart" data-id="1" data-name="香辣薯片" data-price="15.9" aria-label="将香辣薯片加入购物车">加入购物车</button>
+                        </div>
+                        <div class="product-card" data-category="chip" aria-label="商品：原味薯片，价格14.5元，经典原味，低盐健康，净含量100g">
+                            <img src="https://imgservice.suning.cn/uimg1/b2c/image/_g6Xm7MgaE0Hbn5zC_rnCw.png" alt="原味薯片" class="product-img">
+                            <h3 class="product-name">原味薯片</h3>
+                            <p class="product-desc">经典原味，低盐健康，净含量100g</p>
+                            <p class="product-price">¥14.5</p>
+                            <button class="add-to-cart" data-id="5" data-name="原味薯片" data-price="14.5" aria-label="将原味薯片加入购物车">加入购物车</button>
+                        </div>
+                        <!-- 糖果类商品 -->
+                        <div class="product-card" data-category="candy" id="snack2" aria-label="商品：草莓软糖，价格12.5元，Q弹多汁，草莓果香，净含量80g">
+                            <img src="https://imgservice.suning.cn/uimg1/b2c/image/5-dbam4HHn7AWYiTgYZKXw.jpg" alt="草莓软糖" class="product-img">
+                            <h3 class="product-name">草莓软糖</h3>
+                            <p class="product-desc">Q弹多汁，草莓果香，净含量80g</p>
+                            <p class="product-price">¥12.5</p>
+                            <button class="add-to-cart" data-id="2" data-name="草莓软糖" data-price="12.5" aria-label="将草莓软糖加入购物车">加入购物车</button>
+                        </div>
+                        <div class="product-card" data-category="candy" aria-label="商品：巧克力豆，价格18.9元，纯可可脂，脆壳夹心，净含量60g">
+                            <img src="https://img95.699pic.com/photo/60073/3692.jpg_wh860.jpg" alt="巧克力豆" class="product-img">
+                            <h3 class="product-name">巧克力豆</h3>
+                            <p class="product-desc">纯可可脂，脆壳夹心，净含量60g</p>
+                            <p class="product-price">¥18.9</p>
+                            <button class="add-to-cart" data-id="6" data-name="巧克力豆" data-price="18.9" aria-label="将巧克力豆加入购物车">加入购物车</button>
+                        </div>
+                        <!-- 泡面类商品 -->
+                        <div class="product-card" data-category="noodle" id="snack3" aria-label="商品：红烧牛肉面，价格8.9元，经典口味，方便速食，净含量140g">
+                            <img src="https://ts4.tc.mm.bing.net/th/id/OIP-C.KcoO751UfC2B6aQA9RdHTgHaK1?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3" alt="红烧牛肉面" class="product-img">
+                            <h3 class="product-name">红烧牛肉面</h3>
+                            <p class="product-desc">经典口味，方便速食，净含量140g</p>
+                            <p class="product-price">¥8.9</p>
+                            <button class="add-to-cart" data-id="3" data-name="红烧牛肉面" data-price="8.9" aria-label="将红烧牛肉面加入购物车">加入购物车</button>
+                        </div>
+                        <!-- 干货类商品 -->
+                        <div class="product-card" data-category="dried" id="snack4" aria-label="商品：原味坚果，价格29.9元，混合坚果，无添加，净含量200g">
+                            <img src="https://pic.52112.com/JPG-180506/180506_123/RC8q1GmglB_small.jpg" alt="原味坚果" class="product-img">
+                            <h3 class="product-name">原味坚果</h3>
+                            <p class="product-desc">混合坚果，无添加，净含量200g</p>
+                            <p class="product-price">¥29.9</p>
+                            <button class="add-to-cart" data-id="4" data-name="原味坚果" data-price="29.9" aria-label="将原味坚果加入购物车">加入购物车</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- 3. 购物车页内容 -->
+        <section id="cart-page" class="page-content">
+            <section class="cart-page container">
+                <h2>我的购物车</h2>
+                <div class="cart-container">
+                    <div class="cart-items" id="cart-items" aria-label="购物车商品列表">
+                        <!-- 购物车为空时显示 -->
+                        <div class="empty-cart" id="empty-cart" aria-label="购物车为空">
+                            <<i class="fas fa-shopping-cart"></</i>
+                            <p>购物车是空的~ 快去选购零食吧！</p>
+                            <div class="go-shopping" data-page="products-page" aria-label="前往商品列表选购">去商品列表</div>
+                        </div>
+                        <!-- 购物车商品将通过JS动态渲染 -->
+                    </div>
+
+                    <div class="cart-summary" aria-label="订单摘要和收货信息">
+                        <h3>订单摘要</h3>
+                        <div class="summary-item">
+                            <span>商品总价</span>
+                            <span id="total-price">¥0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>配送费</span>
+                            <span>¥0.00（满30元免邮）</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>实付款</span>
+                            <span id="final-price">¥0.00</span>
+                        </div>
+
+                        <!-- 下单表单 -->
+                        <form id="order-form" class="order-form" aria-label="提交订单表单">
+                            <h3>收货信息</h3>
+                            <div class="form-group">
+                                <label for="name">姓名 *</label>
+                                <input type="text" id="name" name="name" required aria-required="true" aria-describedby="name-error">
+                                <span class="error-message" id="name-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话 *</label>
+                                <input type="tel" id="phone" name="phone" required aria-required="true" aria-describedby="phone-error">
+                                <span class="error-message" id="phone-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">收货地址 *</label>
+                                <textarea id="address" name="address" required aria-required="true" aria-describedby="address-error" rows="3"></textarea>
+                                <span class="error-message" id="address-error"></span>
+                            </div>
+                            <button type="submit" class="place-order" aria-label="提交订单">提交订单</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <!-- 语义化底部 -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-section" aria-label="关于我们">
+                <h3>关于我们</h3>
+                <p>零食小铺 - 为您提供优质、美味的休闲零食，覆盖各类热门品类，支持全国配送</p>
+            </div>
+            <div class="footer-section" aria-label="联系方式">
+                <h3>联系方式</h3>
+                <p>电话：123-4567-8910</p>
+                <p>邮箱：service@snackshop.com</p>
+            </div>
+            <div class="footer-section" aria-label="无障碍声明">
+                <h3>无障碍声明</h3>
+                <p>本网站遵循WCAG无障碍标准，支持屏幕阅读器，所有图片均含描述，确保所有用户可访问</p>
+            </div>
+        </div>
+        <div class="copyright">© 2024 零食小铺 版权所有</div>
+    </footer>
+
+    <script>
+        // 全局变量：购物车数据
+        let cart = JSON.parse(localStorage.getItem('snackCart')) || [];
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            initPageSwitch(); // 1. 页面切换功能
+            initMobileMenu(); // 2. 移动端汉堡菜单
+            initProductFilter(); // 3. 商品筛选
+            initCartFunctions(); // 4. 购物车操作
+            initOrderFormValidation(); // 5. 表单验证
+            renderCart(); // 6. 渲染购物车
+            initProductLink(); // 7. 首页商品点击跳转商品列表
+            initCategoryLink(); // 8. 首页分类点击筛选商品
+        });
+
+        // 1. 页面切换功能（核心）
+        function initPageSwitch() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageContents = document.querySelectorAll('.page-content');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const targetPage = this.getAttribute('data-page');
+
+                    // 切换导航高亮
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // 切换页面显示
+                    pageContents.forEach(page => page.classList.remove('active'));
+                    document.getElementById(targetPage).classList.add('active');
+
+                    // 无障碍：更新当前页面状态
+                    navLinks.forEach(l => {
+                        if (l.classList.contains('active')) {
+                            l.setAttribute('aria-current', 'page');
+                        } else {
+                            l.removeAttribute('aria-current');
+                        }
+                    });
+                });
+            });
+
+            // 空购物车"去商品列表"点击切换
+            document.querySelector('.go-shopping').addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-page');
+                navLinks.forEach(l => l.classList.remove('active'));
+                document.querySelector(`.nav-link[data-page="${targetPage}"]`).classList.add('active');
+                pageContents.forEach(page => page.classList.remove('active'));
+                document.getElementById(targetPage).classList.add('active');
+            });
+        }
+
+        // 2. 移动端汉堡菜单
+        function initMobileMenu() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const mainNav = document.querySelector('.main-nav');
+
+            menuToggle.addEventListener('click', function() {
+                mainNav.classList.toggle('active');
+                const isActive = mainNav.classList.contains('active');
+                this.setAttribute('aria-label', isActive ? '关闭导航菜单' : '打开导航菜单');
+                this.setAttribute('aria-expanded', isActive);
+            });
+        }
+
+        // 3. 商品筛选功能
+        function initProductFilter() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const priceFilters = document.querySelectorAll('.price-filter');
+            const productCards = document.querySelectorAll('.product-card');
+
+            // 分类筛选
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+
+                    productCards.forEach(card => {
+                        const category = card.getAttribute('data-category');
+                        card.style.display = (filter === 'all' || category === filter) ? 'block' : 'none';
+                    });
+                });
+            });
+
+            // 价格筛选
+            priceFilters.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    priceFilters.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const min = parseFloat(this.getAttribute('data-min'));
+                    const max = parseFloat(this.getAttribute('data-max'));
+
+                    productCards.forEach(card => {
+                        const price = parseFloat(card.querySelector('.product-price').textContent.slice(1));
+                        card.style.display = (price >= min && price <= max) ? 'block' : 'none';
+                    });
+                });
+            });
+        }
+
+        // 4. 购物车操作（添加/删除/数量调整）
+        function initCartFunctions() {
+            // 加入购物车
+            const addToCartBtns = document.querySelectorAll('.add-to-cart');
+            addToCartBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id') || this.closest('.product-card').getAttribute('data-id');
+                    const name = this.getAttribute('data-name') || this.closest('.product-card').getAttribute('data-name');
+                    const price = parseFloat(this.getAttribute('data-price') || this.closest('.product-card').getAttribute('data-price'));
+
+                    const existingItem = cart.find(item => item.id === id);
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        // 购物车商品图片：对应指定的在线图片路径
+                        const imgMap = {
+                            '1': 'https://img95.699pic.com/photo/60053/2997.jpg_wh860.jpg',
+                            '2': 'https://imgservice.suning.cn/uimg1/b2c/image/5-dbam4HHn7AWYiTgYZKXw.jpg',
+                            '3': 'https://qnam.smzdm.com/202307/08/64a973bb08aca8361.jpg_e1080.jpg',
+                            '4': 'https://pic.52112.com/JPG-180506/180506_123/RC8q1GmglB_small.jpg',
+                            '5': 'https://imgservice.suning.cn/uimg1/b2c/image/_g6Xm7MgaE0Hbn5zC_rnCw.png',
+                            '6': 'https://img95.699pic.com/photo/60073/3692.jpg_wh860.jpg'
+                        };
+                        cart.push({
+                            id: id,
+                            name: name,
+                            price: price,
+                            quantity: 1,
+                            img: imgMap[id] // 精准匹配指定图片
+                        });
+                    }
+
+                    saveCart();
+                    renderCart();
+                    alert(`${name} 已加入购物车！`);
+                });
+            });
+
+            // 购物车操作（事件委托）
+            document.getElementById('cart-items').addEventListener('click', function(e) {
+                // 减少数量
+                if (e.target.classList.contains('decrease-quantity')) {
+                    const id = e.target.closest('.cart-item').getAttribute('data-id');
+                    const item = cart.find(item => item.id === id);
+                    item.quantity > 1 ? item.quantity -= 1 : cart = cart.filter(i => i.id !== id);
+                    saveCart();
+                    renderCart();
+                }
+
+                // 增加数量
+                if (e.target.classList.contains('increase-quantity')) {
+                    const id = e.target.closest('.cart-item').getAttribute('data-id');
+                    cart.find(item => item.id === id).quantity += 1;
+                    saveCart();
+                    renderCart();
+                }
+
+                // 删除商品
+                if (e.target.classList.contains('cart-item-delete')) {
+                    const id = e.target.closest('.cart-item').getAttribute('data-id');
+                    cart = cart.filter(item => item.id !== id);
+                    saveCart();
+                    renderCart();
+                }
+            });
+        }
+
+        // 5. 表单验证
+        function initOrderFormValidation() {
+            const orderForm = document.getElementById('order-form');
+            orderForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                let isValid = true;
+
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const address = document.getElementById('address').value.trim();
+
+                // 验证姓名
+                const nameError = document.getElementById('name-error');
+                name ? (nameError.textContent = '') : (nameError.textContent = '姓名不能为空', isValid = false);
+
+                // 验证电话
+                const phoneError = document.getElementById('phone-error');
+                const phoneReg = /^1[3-9]\d{9}$/;
+                if (!phone) {
+                    phoneError.textContent = '电话不能为空';
+                    isValid = false;
+                } else if (!phoneReg.test(phone)) {
+                    phoneError.textContent = '请输入有效的11位手机号';
+                    isValid = false;
+                } else {
+                    phoneError.textContent = '';
+                }
+
+                // 验证地址
+                const addressError = document.getElementById('address-error');
+                if (!address) {
+                    addressError.textContent = '地址不能为空';
+                    isValid = false;
+                } else if (address.length < 5) {
+                    addressError.textContent = '地址不能少于5个字符';
+                    isValid = false;
+                } else {
+                    addressError.textContent = '';
+                }
+
+                // 提交成功
+                if (isValid && cart.length > 0) {
+                    alert(`订单提交成功！\n收货人：${name}\n电话：${phone}\n地址：${address}\n总价：${document.getElementById('final-price').textContent}`);
+                    cart = [];
+                    saveCart();
+                    renderCart();
+                    orderForm.reset();
+
+                    // 提交后切换到首页
+                    const navLinks = document.querySelectorAll('.nav-link');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelector('.nav-link[data-page="home-page"]').classList.add('active');
+                    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+                    document.getElementById('home-page').classList.add('active');
+                } else if (cart.length === 0) {
+                    alert('购物车为空，无法提交订单！');
+                }
+            });
+        }
+
+        // 6. 渲染购物车
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyCart = document.getElementById('empty-cart');
+            const totalPriceElement = document.getElementById('total-price');
+            const finalPriceElement = document.getElementById('final-price');
+
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const finalPrice = totalPrice >= 30 ? totalPrice : totalPrice + 5;
+
+            totalPriceElement.textContent = `¥${totalPrice.toFixed(2)}`;
+            finalPriceElement.textContent = `¥${finalPrice.toFixed(2)}`;
+
+            if (cart.length === 0) {
+                emptyCart.style.display = 'block';
+                cartItemsContainer.innerHTML = '';
+                cartItemsContainer.appendChild(emptyCart);
+            } else {
+                emptyCart.style.display = 'none';
+                let cartHtml = '';
+                cart.forEach(item => {
+                    cartHtml += `
+                        <div class="cart-item" data-id="${item.id}" aria-label="购物车商品：${item.name}，数量${item.quantity}，单价${item.price}元">
+                            <img src="${item.img}" alt="${item.name}" class="cart-item-img">
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">¥${item.price.toFixed(2)}</div>
+                            </div>
+                            <div class="cart-item-quantity">
+                                <button class="quantity-btn decrease-quantity" aria-label="减少数量">-</button>
+                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" readonly>
+                                <button class="quantity-btn increase-quantity" aria-label="增加数量">+</button>
+                            </div>
+                            <div class="cart-item-subtotal">¥${(item.price * item.quantity).toFixed(2)}</div>
+                            <button class="cart-item-delete" aria-label="删除商品"><<i class="fas fa-trash"></</i></button>
+                        </div>
+                    `;
+                });
+                cartItemsContainer.innerHTML = cartHtml;
+            }
+        }
+
+        // 保存购物车到localStorage
+        function saveCart() {
+            localStorage.setItem('snackCart', JSON.stringify(cart));
+        }
+
+        // 7. 首页商品点击跳转商品列表并定位到对应商品
+        function initProductLink() {
+            const productLinks = document.querySelectorAll('.product-link');
+
+            productLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+
+                    // 切换到商品列表页
+                    const navLinks = document.querySelectorAll('.nav-link');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelector('.nav-link[data-page="products-page"]').classList.add('active');
+                    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+                    document.getElementById('products-page').classList.add('active');
+
+                    // 定位到对应商品（滚动到视图）
+                    setTimeout(() => {
+                        const targetProduct = document.getElementById(targetId);
+                        if (targetProduct) {
+                            targetProduct.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // 高亮目标商品（临时）
+                            targetProduct.style.boxShadow = '0 0 0 2px #e67e22';
+                            setTimeout(() => targetProduct.style.boxShadow = '', 2000);
+                        }
+                    }, 100);
+                });
+            });
+        }
+
+        // 8. 首页分类点击切换商品列表并筛选
+        function initCategoryLink() {
+            const categoryItems = document.querySelectorAll('.category-item');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            categoryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetCategory = this.getAttribute('data-category');
+
+                    // 切换到商品列表页
+                    const navLinks = document.querySelectorAll('.nav-link');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelector('.nav-link[data-page="products-page"]').classList.add('active');
+                    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+                    document.getElementById('products-page').classList.add('active');
+
+                    // 触发对应分类筛选
+                    setTimeout(() => {
+                        filterBtns.forEach(btn => {
+                            if (btn.getAttribute('data-filter') === targetCategory) {
+                                btn.click(); // 模拟点击筛选按钮
+                            }
+                        });
+                    }, 100);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
